@@ -1,0 +1,7 @@
+{{ range $ }}
+{{ range $labelKey, $labelValue := .Labels }}
+{{ if and (hasPrefix "traefik.http.routers." $labelKey) (hasSuffix ".rule" $labelKey) }}
+{{ $labelValue }}
+{{ end }}
+{{ end }}
+{{ end }}
