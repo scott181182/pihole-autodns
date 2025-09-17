@@ -1,0 +1,9 @@
+services:
+  autodns:
+    image: ghcr.io/scott181182/pihole-autodns:0.1.0
+    environment:
+      HOST_IP: 192.168.1.2
+      PIHOLE_API_PATH: http://pihole/api
+      PIHOLE_PASSWORD: pihole-app-password
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:rw
