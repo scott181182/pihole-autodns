@@ -22,7 +22,7 @@ const authResponseSchema = z.object({
 
 const dnsHostSchema = z.codec(
     z.string().check(z.regex(/([\d.]+) ([^\s])/)),
-    z.object({ ip: z.ipv4(), domain: z.url() }),
+    z.object({ ip: z.ipv4(), domain: z.string() }),
     {
         decode: (host) => {
             const [ip, domain] = host.split(" ");
