@@ -29,22 +29,15 @@ export async function waitForFileToExist(file: Bun.BunFile, period: number, maxT
 
 
 export interface DiffArrayResult {
-    add: string[];
-    remove: string[];
+    add: Set<string>;
+    remove: Set<string>;
 }
-export function diffArrays(current: string[], desired: string[]): DiffArrayResult {
-    const res: DiffArrayResult = { add: [], remove: [] };
+export function diffArrays(current: string[] | Set<string>, desired: string[] | Set<string>): DiffArrayResult {
+    if(Array.isArray(current)) { current = new Set(current); }
+    if(Array.isArray(desired)) { desired = new Set(desired); }
 
-    for(const d of desired) {
-        if(!current.includes(d)) {
-            res.add.push(d);
-        }
-    }
-    for(const c of current) {
-        if(!desired.includes(c)) {
-            res.remove.push(c);
-        }
-    }
-
-    return res;
+    return {
+        add: desired.difference(current),
+        remove: current.difference(desired),
+    };
 }
