@@ -52,17 +52,17 @@ async function reconcileDomainNames(client: PiHoleClient, ip: string, options: U
 
     await client.authenticate();
     const currentHosts = await client.getDnsHosts();
-    const diff = diffArrays(currentHosts.map((h) => h.domain), [...domains]);
+    const diff = diffArrays(currentHosts.map((h) => h.domain), domains);
 
-    if(diff.add.length === 0 && diff.remove.length === 0) {
+    if(diff.add.size === 0 && diff.remove.size === 0) {
         logger.info("    No DNS changes to be made");
         return;
     }
 
     logger.info("    Found diff:");
     logger.info(
-        diff.add.map((h) => `      + ${h}`).join("\n") +
-        diff.remove.map((h) => `      - ${h}`).join("\n")
+        diff.add.values().map((h) => `      + ${h}`).toArray().join("\n") +
+        diff.remove.values().map((h) => `      - ${h}`).toArray().join("\n")
     );
 
     logger.info("    Sending Updates to PiHole API...");
