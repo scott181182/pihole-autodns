@@ -1,9 +1,9 @@
 import { describe, it, expect } from "bun:test"
-import { parseDomains, parseTraeficDomains } from "./parse";
+import { parseDomains, parseTraefikDomains } from "./parse";
 
 
 
-describe("parseTraeficDomains", () => {
+describe("parseTraefikDomains", () => {
     const TRAEFIK_RULE_CONTENT = `
         Host(\`traefik.home\`)&&PathPrefix(\`/api\`)
         Host(\`traefik.home\`)
@@ -13,7 +13,7 @@ describe("parseTraeficDomains", () => {
 
     it("should parse traefik router rules", async () => {
         const blob = new Blob([TRAEFIK_RULE_CONTENT])
-        const res = await parseTraeficDomains(blob);
+        const res = await parseTraefikDomains(blob);
 
         expect(res).toEqual([
             "traefik.home",
