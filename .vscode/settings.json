@@ -1,0 +1,12 @@
+{
+    "editor.codeActionsOnSave": {
+        "source.fixAll.biome": "explicit",
+        "source.removeUnusedImports": "explicit"
+    },
+    "editor.formatOnSave": true,
+    "biome.enabled": true,
+    "[json]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "cSpell.words": ["pihole", "traefik"]
+}

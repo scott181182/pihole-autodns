@@ -1,10 +1,9 @@
-
-
-
 export class Logger {
     private formatMessage(level: string, message: string, extras?: Record<string, unknown>): string {
         let msg = `${new Date().toISOString()} [${level}] ${message}`;
-        if(extras) { msg += " " + JSON.stringify(extras)};
+        if (extras) {
+            msg += ` ${JSON.stringify(extras)}`;
+        }
         return msg;
     }
 
