@@ -1,14 +1,12 @@
 import * as z from "zod/mini";
 
-
-
 const apiErrorSchema = z.object({
     key: z.string(),
     message: z.string(),
     hint: z.optional(z.nullable(z.string())),
 });
 const apiErrorResponseSchema = z.object({
-    error: apiErrorSchema
+    error: apiErrorSchema,
 });
 
 const authResponseSchema = z.object({
@@ -16,8 +14,8 @@ const authResponseSchema = z.object({
         valid: z.boolean(),
         sid: z.nullable(z.string()),
         validity: z.int(),
-        message: z.string()
-    })
+        message: z.string(),
+    }),
 });
 
 const dnsHostSchema = z.codec(
@@ -26,27 +24,29 @@ const dnsHostSchema = z.codec(
     {
         decode: (host) => {
             const [ip, domain] = host.split(" ");
-            return { ip: ip!, domain: domain! };
+            if (!ip || !domain) {
+                throw new Error(`Could not parse ip or domain from PiHole host string '${host}'`);
+            }
+            return { ip, domain };
         },
-        encode: ({ ip, domain }) => `${ip} ${domain}`
-    }
-)
+        encode: ({ ip, domain }) => `${ip} ${domain}`,
+    },
+);
 const dnsHostsResponseSchema = z.object({
     config: z.object({
         dns: z.object({
-            hosts: z.array(dnsHostSchema)
-        })
-    })
+            hosts: z.array(dnsHostSchema),
+        }),
+    }),
 });
-
-
 
 export class PiHoleError extends Error {
     public constructor(
         message?: string,
         public readonly response?: z.infer<typeof apiErrorSchema>,
+        cause?: unknown,
     ) {
-        super(message ?? "Error response from PiHole API");
+        super(message ?? "Error response from PiHole API", { cause });
     }
 }
 
@@ -75,33 +75,37 @@ export class PiHoleClient {
      */
     public constructor(
         public readonly apiBase: string,
-        private readonly password: string
-    ) {  }
+        private readonly password: string,
+    ) {}
 
     private async makeApiRequest(path: string, init?: ApiRequestInit) {
-        if(init?.json) {
+        if (init?.json) {
             init.body = JSON.stringify(init.json);
             init.headers = {
                 ...init.headers,
                 "content-type": "application/json",
-            }
+            };
         }
-        if(!init?.noSid) {
-            if(!this.sid) {
+        if (!init?.noSid) {
+            if (!this.sid) {
                 throw new Error(`Not authenticated. Cannot send request to '${path}' endpoint`);
             }
             // TODO: be smarter about adding query params.
-            path += `?sid=${this.sid}`
+            path += `?sid=${this.sid}`;
         }
         const res = await fetch(`${this.apiBase}${path}`, init);
 
-        if(!res.ok) {
+        if (!res.ok) {
             try {
                 const resBody = await res.json();
                 const err = apiErrorResponseSchema.parse(resBody);
                 throw new PiHoleError(undefined, err.error);
-            } catch(err) {
-                throw new PiHoleError(`Error response from PiHole API (${res.status}) and could not parse response body`)
+            } catch (err) {
+                throw new PiHoleError(
+                    `Error response from PiHole API (${res.status}) and could not parse response body`,
+                    undefined,
+                    err,
+                );
             }
         }
 
@@ -119,7 +123,7 @@ export class PiHoleClient {
         });
 
         const resData = authResponseSchema.parse(res);
-        if(!resData.session.sid) {
+        if (!resData.session.sid) {
             throw new Error("Failed to get `sid` from auth response");
         }
 

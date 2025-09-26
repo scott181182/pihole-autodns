@@ -1,7 +1,6 @@
-import { describe, it, expect } from "bun:test"
+import { describe, expect, it } from "bun:test";
+
 import { parseDomains, parseTraefikDomains } from "./parse";
-
-
 
 describe("parseTraefikDomains", () => {
     const TRAEFIK_RULE_CONTENT = `
@@ -12,14 +11,10 @@ describe("parseTraefikDomains", () => {
     `;
 
     it("should parse traefik router rules", async () => {
-        const blob = new Blob([TRAEFIK_RULE_CONTENT])
+        const blob = new Blob([TRAEFIK_RULE_CONTENT]);
         const res = await parseTraefikDomains(blob);
 
-        expect(res).toEqual([
-            "traefik.home",
-            "grist.home",
-            "pihole.home",
-        ]);
+        expect(res).toEqual(["traefik.home", "grist.home", "pihole.home"]);
     });
 });
 
@@ -32,13 +27,9 @@ describe("parseDomains", () => {
     `;
 
     it("should parse domains", async () => {
-        const blob = new Blob([WHITELIST_CONTENT])
+        const blob = new Blob([WHITELIST_CONTENT]);
         const res = await parseDomains(blob);
 
-        expect(res).toEqual([
-            "something.random.home",
-            "pihole.home",
-            "example.local",
-        ]);
+        expect(res).toEqual(["something.random.home", "pihole.home", "example.local"]);
     });
 });
