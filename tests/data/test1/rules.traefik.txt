@@ -1,0 +1,4 @@
+Host(`traefik.home`)&&PathPrefix(`/api`)
+Host(`traefik.home`)
+Host(`grist.home`)
+Host(`pihole.home`)

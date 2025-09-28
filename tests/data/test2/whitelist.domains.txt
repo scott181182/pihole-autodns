@@ -1,0 +1,4 @@
+something.random.home
+
+pihole.home
+example.local
