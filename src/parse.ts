@@ -1,3 +1,7 @@
+import { readdir } from "node:fs/promises";
+import path from "node:path";
+
+import type { ILogger } from "./logger";
 import { isTruthy } from "./utils";
 
 /**
@@ -23,4 +27,38 @@ export async function parseDomains(file: Blob): Promise<string[]> {
         .split(/[\n\r]+/)
         .map((line) => line.trim())
         .filter(isTruthy);
+}
+
+export async function parseDomainsFromDirectory(directoryPath: string, logger: ILogger): Promise<Set<string>> {
+    const domains = new Set<string>();
+    const dirEntries = await readdir(directoryPath, { withFileTypes: true });
+
+    if (dirEntries.length === 0) {
+        logger.warn("No files found in data directory");
+    }
+    for (const entry of dirEntries) {
+        if (!entry.isFile()) {
+            logger.debug(`Skipping '${entry.name}' (not a file)`);
+            continue;
+        }
+
+        const file = Bun.file(path.join(entry.parentPath, entry.name));
+        if (entry.name.includes(".domains.")) {
+            logger.debug(`Parsing '${entry.name}' as list of domains`);
+            const whitelistDomains = await parseDomains(file);
+            whitelistDomains.forEach((d) => {
+                domains.add(d);
+            });
+        } else if (entry.name.includes(".traefik.")) {
+            logger.debug(`Parsing '${entry.name}' as list of Traefik router rules`);
+            const traefikDomains = await parseTraefikDomains(file);
+            traefikDomains.forEach((d) => {
+                domains.add(d);
+            });
+        } else {
+            logger.warn(`Skipping '${entry.name}' (not sure how to parse)`);
+        }
+    }
+
+    return domains;
 }

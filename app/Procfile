@@ -1,2 +1,2 @@
-dockergen: docker-gen -watch /etc/docker-gen/templates/traefik_rules.tpl.txt /app/data/traefik_rules.txt
+dockergen: docker-gen -watch /etc/docker-gen/templates/traefik_rules.tpl.txt $DATA_DIRECTORY/rules.traefik.txt
 app: bun run /app/index.js
