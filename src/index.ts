@@ -14,7 +14,12 @@ import { diffArrays } from "./utils";
 async function reconcileDomainNames(client: PiHoleClient, config: Config, logger: ILogger) {
     const domains = await parseDomainsFromDirectory(config.directory, logger);
     await client.authenticate();
-    const currentHosts = await client.getDnsHosts();
+
+    /** All DNS rules currently on the PiHole instance. */
+    const allCurrentHosts = await client.getDnsHosts();
+    /** DNS rules for the given host IP address on the PiHole instance. */
+    const currentHosts = allCurrentHosts.filter((d) => d.ip === config.hostIp);
+
     const diff = diffArrays(
         currentHosts.map((h) => h.domain),
         domains,
